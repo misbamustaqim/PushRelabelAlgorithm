@@ -149,7 +149,7 @@ public class PushRelabel {
 		
 		int deltaFlow = Math.min(firstVertex.getExcessFlow(), edge.getRemainingCapacity());
 		
-		System.out.println("Pushing " + deltaFlow + " from " + firstVertex.getVertexName() + " to " + secondVertex.getVertexName());
+		//System.out.println("Pushing " + deltaFlow + " from " + firstVertex.getVertexName() + " to " + secondVertex.getVertexName());
 				
 		Edge reverseEdge = null;
 		
@@ -191,7 +191,7 @@ public class PushRelabel {
 			}
 		}
 		
-		System.out.println("Relabling " + vertex.getVertexName() + " old: " + vertex.getHeight() + " new: " + (minHeight + 1));
+		//System.out.println("Relabling " + vertex.getVertexName() + " old: " + vertex.getHeight() + " new: " + (minHeight + 1));
 		
 		vertex.setHeight(minHeight + 1);
 		
