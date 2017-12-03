@@ -7,11 +7,13 @@ public class PushRelabel {
 	private Graph graph;
 	private boolean isInitialized;
 	private int maxFlow;
+	private Queue<Vertex> relabelVertexQueue;
 	
 	public PushRelabel()
 	{
 		this.graph = new Graph();
 		this.isInitialized = false;
+		this.relabelVertexQueue = new LinkedList<Vertex>();
 	}
 	
 	public void addEdge(String firstVertex, String secondVertex, int capacity) throws Exception
@@ -39,58 +41,52 @@ public class PushRelabel {
 	}
 	
 	private void calculateMaxFlow() throws Exception
-	{
-		HashSet<Vertex> allVertices = this.graph.getAllVertices();
+	{		
+		while (relabelVertexQueue.size() > 0) {
+			
+			Vertex vertex = this.relabelVertexQueue.poll();
 
-		Vertex sink = this.graph.getVertex("t");
-		
-		allVertices.remove(sink);
-		
-		boolean anyVertexHasExcessflow = true;
-		
-		while(anyVertexHasExcessflow)
-		{				
-			boolean isRelabelApplicable = false;
-			for (Vertex vertex : allVertices) {	
-				if(vertex.getExcessFlow() > 0)
-				{
-					for (Edge edge : vertex.getOutEdges()) {
+			if (vertex.getExcessFlow() > 0) {
+				for (Edge edge : vertex.getOutEdges()) {
 
-						if(edge.getRemainingCapacity() > 0 && edge.getOutVertex().getHeight() >= vertex.getHeight())
-						{
-							isRelabelApplicable = true;
-							break;
-						}
-					}
-					
-					if(isRelabelApplicable)
-					{
+					if (edge.getRemainingCapacity() > 0 && edge.getOutVertex().getHeight() >= vertex.getHeight()) {
+
 						this.relabel(vertex);
 						this.tryToPushForExcessFlow(vertex);
-					}					
+						
+						break;
+					}
 				}
 			}
-			
-			anyVertexHasExcessflow = isRelabelApplicable;
 		}
-		
-		this.maxFlow = sink.getExcessFlow();
+
+		this.maxFlow = this.graph.getVertex("t").getExcessFlow();
 	}
 
 	private void tryToPushForExcessFlow(Vertex vertexWithOverflow) throws Exception {
+		
+		boolean isPushSuccessful = false;
+		
 		for (Edge edge : vertexWithOverflow.getOutEdges()) {
 			
 			Vertex secondVertex = edge.getOutVertex();
-					
+			
 			if(vertexWithOverflow.getExcessFlow() > 0 
 					&& edge.getRemainingCapacity() > 0
 					&& vertexWithOverflow.getHeight() == secondVertex.getHeight() + 1)
 			{
 				this.push(edge);
 				
+				isPushSuccessful = true;
+				
 				Vertex innerSecondVertex = edge.getOutVertex();
 				
 				tryToPushForExcessFlow(innerSecondVertex);
+			}
+			
+			if(isPushSuccessful == false && vertexWithOverflow.getExcessFlow() > 0 && !vertexWithOverflow.getVertexName().equals("t"))
+			{
+				this.relabelVertexQueue.add(vertexWithOverflow);
 			}
 		}
 	}
@@ -126,6 +122,8 @@ public class PushRelabel {
 			reverseEdge.setFlow(0);
 			
 			edge.getOutVertex().setExcessFlow(edgeCapacity);
+			
+			this.relabelVertexQueue.add(edge.getOutVertex());
 			
 			int sourceExcessFlow = source.getExcessFlow();
 			
