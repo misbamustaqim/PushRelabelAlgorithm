@@ -1,5 +1,6 @@
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.PriorityQueue;
 import java.util.Queue;
 
 public class PushRelabel {
@@ -8,6 +9,8 @@ public class PushRelabel {
 	private boolean isInitialized;
 	private int maxFlow;
 	private Queue<Vertex> relabelVertexQueue;
+	private int relabelCount = 0;
+	private int pushCount = 0;
 	
 	public PushRelabel()
 	{
@@ -59,6 +62,9 @@ public class PushRelabel {
 				}
 			}
 		}
+		
+		System.out.println("RelabelCount: " + this.relabelCount);
+		System.out.println("PushCount: " + this.pushCount);
 
 		this.maxFlow = this.graph.getVertex("t").getExcessFlow();
 	}
@@ -160,6 +166,8 @@ public class PushRelabel {
 		
 		firstVertex.setExcessFlow(firstVertex.getExcessFlow() - deltaFlow);
 		secondVertex.setExcessFlow(secondVertex.getExcessFlow() + deltaFlow);
+		
+		this.pushCount++;
 	}
 	
 	private void relabel(Vertex vertex) throws Exception
@@ -186,5 +194,7 @@ public class PushRelabel {
 		System.out.println("Relabling " + vertex.getVertexName() + " old: " + vertex.getHeight() + " new: " + (minHeight + 1));
 		
 		vertex.setHeight(minHeight + 1);
+		
+		this.relabelCount++;
 	}
 }
